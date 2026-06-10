@@ -13,7 +13,7 @@ export class UsersService {
   ) { }
 
   async findAll(paginationDto: PaginationDto): Promise<PaginatedResponseDto<any>> {
-    const { page, limit } = paginationDto;
+    const { page = 1, limit = 20 } = paginationDto;
     const skip = (page - 1) * limit;
 
     const [users, total] = await Promise.all([

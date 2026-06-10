@@ -11,7 +11,7 @@ export class PlanService {
   ) { }
 
   async findAll(paginationDto: PaginationDto): Promise<PaginatedResponseDto<any>> {
-    const { page, limit } = paginationDto;
+    const { page = 1, limit = 20 } = paginationDto;
     const skip = (page - 1) * limit;
 
     const [plans, total] = await Promise.all([

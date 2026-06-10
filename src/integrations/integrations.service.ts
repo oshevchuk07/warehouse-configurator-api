@@ -20,7 +20,7 @@ export class IntegrationsService {
 
   // IntegrationGroup CRUD operations
   async findAllIntegrationGroups(paginationDto: PaginationDto): Promise<PaginatedResponseDto<any>> {
-    const { page, limit } = paginationDto;
+    const { page = 1, limit = 20 } = paginationDto;
     const skip = (page - 1) * limit;
 
     const [groups, total] = await Promise.all([
@@ -135,7 +135,7 @@ export class IntegrationsService {
 
   // Integration CRUD operations
   async findAllIntegrations(paginationDto: PaginationDto): Promise<PaginatedResponseDto<any>> {
-    const { page, limit } = paginationDto;
+    const { page = 1, limit = 20 } = paginationDto;
     const skip = (page - 1) * limit;
 
     const [integrations, total] = await Promise.all([
@@ -298,7 +298,7 @@ export class IntegrationsService {
 
   // PlanIntegration CRUD operations
   async findAllPlanIntegrations(paginationDto: PaginationDto): Promise<PaginatedResponseDto<any>> {
-    const { page, limit } = paginationDto;
+    const { page = 1, limit = 20 } = paginationDto;
     const skip = (page - 1) * limit;
 
     const [planIntegrations, total] = await Promise.all([
