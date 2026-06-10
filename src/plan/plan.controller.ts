@@ -15,7 +15,7 @@ export class PlanController {
     return this.planService.createPlan(createPlanDto);
   }
 
-  @Get('')
+  @Get()
   findAll() {
     return this.planService.findAll();
   }
@@ -35,8 +35,8 @@ export class PlanController {
     return this.planService.removePlan(+id);
   }
 
-  @Post('bulk-replace-integrations')
-  bulkReplaceIntegrations(@Body() addIntegrationsToPlanDto: AddIntegrationsToPlanDto) {
-    return this.planService.bulkReplacePlanIntegrations(addIntegrationsToPlanDto.planId, addIntegrationsToPlanDto.integrationIds);
+  @Put(':id/integrations')
+  replaceIntegrations(@Param('id') id: number, @Body() body: { integrationIds: number[] }) {
+    return this.planService.bulkReplacePlanIntegrations(+id, body.integrationIds);
   }
 }

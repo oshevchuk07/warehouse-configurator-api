@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { ApiResponse } from "src/common/api-response.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CloudinaryService } from "src/cloudinary/cloudinary.service";
 import * as bcrypt from 'bcrypt';
@@ -12,8 +11,8 @@ export class UsersService {
     private cloudinary: CloudinaryService
   ) { }
 
-  async findAll(): Promise<ApiResponse<any>> {
-    const users = await this.prisma.user.findMany({
+  async findAll(): Promise<any> {
+    return this.prisma.user.findMany({
       select: {
         createdAt: true,
         email: true,
@@ -27,11 +26,10 @@ export class UsersService {
         role: true,
         updatedAt: true
       }
-    })
-    return new ApiResponse(true, '', users)
+    });
   }
 
-  async getUserById(id: number): Promise<ApiResponse<any>> {
+  async getUserById(id: number): Promise<any> {
     const user = await this.prisma.user.findUnique({
       where: { id },
       select: {
@@ -53,10 +51,10 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    return new ApiResponse(true, 'User retrieved successfully', user);
+    return user;
   }
 
-  async updateUser(id: number, updateUserDto: any): Promise<ApiResponse<any>> {
+  async updateUser(id: number, updateUserDto: any): Promise<any> {
     const user = await this.prisma.user.findUnique({
       where: { id }
     });
@@ -65,7 +63,7 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    const updatedUser = await this.prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: updateUserDto,
       select: {
@@ -82,11 +80,9 @@ export class UsersService {
         updatedAt: true
       }
     });
-
-    return new ApiResponse(true, 'User updated successfully', updatedUser);
   }
 
-  async removeUser(id: number): Promise<ApiResponse<any>> {
+  async removeUser(id: number): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id }
     });
@@ -98,11 +94,9 @@ export class UsersService {
     await this.prisma.user.delete({
       where: { id }
     });
-
-    return new ApiResponse(true, 'User deleted successfully');
   }
 
-  async assignPlan(id: number, assignPlanDto: any): Promise<ApiResponse<any>> {
+  async assignPlan(id: number, assignPlanDto: any): Promise<any> {
     const user = await this.prisma.user.findUnique({
       where: { id }
     });
@@ -113,7 +107,7 @@ export class UsersService {
 
     const paymentType = assignPlanDto.paymentType || 'MONTHLY';
 
-    const updatedUser = await this.prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: {
         planId: assignPlanDto.planId,
@@ -133,11 +127,9 @@ export class UsersService {
         updatedAt: true
       }
     });
-
-    return new ApiResponse(true, 'Plan assigned successfully', updatedUser);
   }
 
-  async removePlan(id: number): Promise<ApiResponse<any>> {
+  async removePlan(id: number): Promise<any> {
     const user = await this.prisma.user.findUnique({
       where: { id }
     });
@@ -146,7 +138,7 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    const updatedUser = await this.prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: { planId: null },
       select: {
@@ -163,11 +155,9 @@ export class UsersService {
         updatedAt: true
       }
     });
-
-    return new ApiResponse(true, 'Plan removed successfully', updatedUser);
   }
 
-  async changePassword(id: number, changePasswordDto: any): Promise<ApiResponse<any>> {
+  async changePassword(id: number, changePasswordDto: any): Promise<any> {
     const user = await this.prisma.user.findUnique({
       where: { id }
     });
@@ -187,7 +177,7 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(changePasswordDto.newPassword, saltRounds);
 
     // Update the user with the new password
-    const updatedUser = await this.prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: { passwordHash: hashedPassword },
       select: {
@@ -203,11 +193,9 @@ export class UsersService {
         updatedAt: true
       }
     });
-
-    return new ApiResponse(true, 'Password changed successfully', updatedUser);
   }
 
-  async updateSelf(id: number, updateSelfDto: any, avatar?: Express.Multer.File): Promise<ApiResponse<any>> {
+  async updateSelf(id: number, updateSelfDto: any, avatar?: Express.Multer.File): Promise<any> {
     // Only allow updating firstName and lastName
     const updateData: any = {};
     if (updateSelfDto.firstName !== undefined) {
@@ -224,7 +212,7 @@ export class UsersService {
       updateData.avatar = uploadedImage.url;
     }
 
-    const updatedUser = await this.prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: updateData,
       select: {
@@ -241,11 +229,9 @@ export class UsersService {
         updatedAt: true
       }
     });
-
-    return new ApiResponse(true, 'User updated successfully', updatedUser);
   }
 
-  async removeAvatar(id: number): Promise<ApiResponse<any>> {
+  async removeAvatar(id: number): Promise<any> {
     // Get the current user to check if they have an avatar
     const user = await this.prisma.user.findUnique({
       where: { id }
@@ -261,16 +247,11 @@ export class UsersService {
     }
 
     // Extract public ID from Cloudinary URL
-    // Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/{resource_type}/{type}/{public_id}.{format}
-    // Or: https://res.cloudinary.com/{cloud_name}/image/upload/v{version}/{public_id}.{format}
     const urlParts = user.avatar.split('/');
     const publicIdWithExtension = urlParts[urlParts.length - 1];
     let publicId = publicIdWithExtension.split('.')[0];
     
-    // Handle versioned URLs (v{version}/public_id.format)
-    // Check if the previous part is a version indicator
     if (urlParts.length >= 2 && urlParts[urlParts.length - 2].startsWith('v') && urlParts[urlParts.length - 2].match(/^v\d+$/)) {
-      // This is a versioned URL, combine the version and public ID
       publicId = urlParts[urlParts.length - 2] + '/' + publicId;
     }
 
@@ -278,12 +259,11 @@ export class UsersService {
     try {
       await this.cloudinary.deleteImage(publicId);
     } catch (error) {
-      // Log the error but continue with removing the avatar reference
       console.error('Failed to delete image from Cloudinary:', error);
     }
 
     // Remove avatar reference from user
-    const updatedUser = await this.prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: { avatar: null },
       select: {
@@ -300,7 +280,5 @@ export class UsersService {
         updatedAt: true
       }
     });
-
-    return new ApiResponse(true, 'Avatar removed successfully', updatedUser);
   }
 }

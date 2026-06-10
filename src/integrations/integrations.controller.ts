@@ -18,6 +18,7 @@ export class IntegrationsController {
     private integrationsService: IntegrationsService
   ) { }
 
+  // --- Integration Groups ---
   @Post('groups')
   createGroup(@Body() createIntegrationGroupDto: CreateIntegrationGroupDto) {
     return this.integrationsService.createIntegrationGroups(createIntegrationGroupDto);
@@ -43,13 +44,13 @@ export class IntegrationsController {
     return this.integrationsService.removeIntegrationGroups(+id);
   }
 
-
+  // --- Integrations ---
   @Post()
   create(@Body() createIntegrationDto: CreateIntegrationDto) {
     return this.integrationsService.createIntegration(createIntegrationDto);
   }
 
-  @Get('')
+  @Get()
   findAll() {
     return this.integrationsService.findAllIntegrations();
   }
@@ -69,40 +70,40 @@ export class IntegrationsController {
     return this.integrationsService.removeIntegration(+id);
   }
 
-  // PlanIntegration endpoints
-  @Post('plan-integration')
+  @Post(':id/logo')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadLogo(@Param('id') id: number, @UploadedFile() file: Express.Multer.File) {
+    return this.integrationsService.uploadIntegrationImage(+id, file);
+  }
+
+  @Delete(':id/logo')
+  deleteLogo(@Param('id') id: number) {
+    return this.integrationsService.deleteIntegrationImage(+id);
+  }
+
+  // --- Plan Integrations (Relationships) ---
+  @Post('plan-integrations')
   createPlanIntegration(@Body() createPlanIntegrationDto: CreatePlanIntegrationDto) {
     return this.integrationsService.createPlanIntegration(createPlanIntegrationDto);
   }
 
-  @Get('plan-integration/list')
+  @Get('plan-integrations')
   findAllPlanIntegrations() {
     return this.integrationsService.findAllPlanIntegrations();
   }
 
-  @Get('plan-integration/:id')
+  @Get('plan-integrations/:id')
   findOnePlanIntegration(@Param('id') id: number) {
     return this.integrationsService.getPlanIntegrationById(+id);
   }
 
-  @Put('plan-integration/:id')
+  @Put('plan-integrations/:id')
   updatePlanIntegration(@Param('id') id: number, @Body() updatePlanIntegrationDto: UpdatePlanIntegrationDto) {
     return this.integrationsService.updatePlanIntegration(+id, updatePlanIntegrationDto);
   }
 
-  @Delete('plan-integration/:id')
+  @Delete('plan-integrations/:id')
   removePlanIntegration(@Param('id') id: number) {
     return this.integrationsService.removePlanIntegration(+id);
-  }
-
-  @Post('upload-image/:id')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadIntegrationImage(@Param('id') id: number, @UploadedFile() file: Express.Multer.File) {
-    return this.integrationsService.uploadIntegrationImage(+id, file);
-  }
-
-  @Delete('delete-image/:id')
-  deleteIntegrationImage(@Param('id') id: number) {
-    return this.integrationsService.deleteIntegrationImage(+id);
   }
 }

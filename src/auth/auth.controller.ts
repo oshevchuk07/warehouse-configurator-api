@@ -2,7 +2,6 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards, 
 import { AuthService } from "./auth.service";
 import { LoginDto, RegisterDto, ActivateDto } from "./dto/auth.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
-import { ApiResponse } from "src/common/api-response.dto";
 
 @Controller('auth')
 export class AuthController {
@@ -37,7 +36,7 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   getProfile(@Request() req) {
-    return new ApiResponse(true, '', req.user);
+    return req.user;
   }
 
   @Post('forgot-password')

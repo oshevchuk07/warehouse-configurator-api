@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { ApiResponse } from "src/common/api-response.dto";
 import { CreatePlanDto, UpdatePlanDto } from "./plan.dto";
 
 @Injectable()
@@ -10,8 +9,8 @@ export class PlanService {
     private prisma: PrismaService
   ) { }
 
-  async findAll(): Promise<ApiResponse<any>> {
-    const plans = await this.prisma.plan.findMany({
+  async findAll(): Promise<any> {
+    return this.prisma.plan.findMany({
       select: {
         id: true,
         name: true,
@@ -29,10 +28,9 @@ export class PlanService {
         planIntegrations: true
       }
     });
-    return new ApiResponse(true, '', plans);
   }
 
-  async getPlanById(id: number): Promise<ApiResponse<any>> {
+  async getPlanById(id: number): Promise<any> {
     const plan = await this.prisma.plan.findUnique({
       where: { id },
       select: {
@@ -57,10 +55,10 @@ export class PlanService {
       throw new NotFoundException('Plan not found');
     }
 
-    return new ApiResponse(true, 'Plan retrieved successfully', plan);
+    return plan;
   }
 
-  async getPlanWithIntegrations(id: number): Promise<ApiResponse<any>> {
+  async getPlanWithIntegrations(id: number): Promise<any> {
     const plan = await this.prisma.plan.findUnique({
       where: { id },
       select: {
@@ -105,15 +103,15 @@ export class PlanService {
       throw new NotFoundException('Plan not found');
     }
 
-    return new ApiResponse(true, 'Plan with integrations retrieved successfully', plan);
+    return plan;
   }
 
-  async createPlan(createPlanDto: CreatePlanDto): Promise<ApiResponse<any>> {
+  async createPlan(createPlanDto: CreatePlanDto): Promise<any> {
     const data = Object.fromEntries(
       Object.entries(createPlanDto).filter(([_, v]) => v !== undefined)
     ) as any;
 
-    const plan = await this.prisma.plan.create({
+    return this.prisma.plan.create({
       data: data,
       select: {
         id: true,
@@ -132,11 +130,9 @@ export class PlanService {
         updatedAt: true
       }
     });
-
-    return new ApiResponse(true, 'Plan created successfully', plan);
   }
 
-  async updatePlan(id: number, updatePlanDto: UpdatePlanDto): Promise<ApiResponse<any>> {
+  async updatePlan(id: number, updatePlanDto: UpdatePlanDto): Promise<any> {
     const plan = await this.prisma.plan.findUnique({
       where: { id }
     });
@@ -145,7 +141,7 @@ export class PlanService {
       throw new NotFoundException('Plan not found');
     }
 
-    const updatedPlan = await this.prisma.plan.update({
+    return this.prisma.plan.update({
       where: { id },
       data: {
         name: updatePlanDto.name,
@@ -177,11 +173,9 @@ export class PlanService {
         updatedAt: true
       }
     });
-
-    return new ApiResponse(true, 'Plan updated successfully', updatedPlan);
   }
 
-  async removePlan(id: number): Promise<ApiResponse<any>> {
+  async removePlan(id: number): Promise<void> {
     const plan = await this.prisma.plan.findUnique({
       where: { id }
     });
@@ -199,11 +193,9 @@ export class PlanService {
     await this.prisma.plan.delete({
       where: { id }
     });
-
-    return new ApiResponse(true, 'Plan deleted successfully');
   }
 
-  async bulkReplacePlanIntegrations(planId: number, integrationIds: number[]): Promise<ApiResponse<any>> {
+  async bulkReplacePlanIntegrations(planId: number, integrationIds: number[]): Promise<void> {
     // Check if plan exists
     const plan = await this.prisma.plan.findUnique({
       where: { id: planId }
@@ -229,7 +221,5 @@ export class PlanService {
         data: newPlanIntegrations
       });
     }
-
-    return new ApiResponse(true, 'Plan integrations updated successfully');
   }
 }

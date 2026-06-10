@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { ApiResponse } from "src/common/api-response.dto";
 import {
   CreateIntegrationGroupDto,
   UpdateIntegrationGroupDto,
@@ -19,18 +18,17 @@ export class IntegrationsService {
   ) { }
 
   // IntegrationGroup CRUD operations
-  async findAllIntegrationGroups(): Promise<ApiResponse<any>> {
-    const groups = await this.prisma.integrationGroup.findMany({
+  async findAllIntegrationGroups(): Promise<any> {
+    return this.prisma.integrationGroup.findMany({
       select: {
         id: true,
         name: true,
         integrations: true
       }
     });
-    return new ApiResponse(true, '', groups);
   }
 
-  async getIntegrationGroupsById(id: number): Promise<ApiResponse<any>> {
+  async getIntegrationGroupsById(id: number): Promise<any> {
     const group = await this.prisma.integrationGroup.findUnique({
       where: { id },
       select: {
@@ -43,11 +41,11 @@ export class IntegrationsService {
       throw new NotFoundException('Integration group not found');
     }
 
-    return new ApiResponse(true, 'Integration group retrieved successfully', group);
+    return group;
   }
 
-  async createIntegrationGroups(createIntegrationGroupDto: CreateIntegrationGroupDto): Promise<ApiResponse<any>> {
-    const group = await this.prisma.integrationGroup.create({
+  async createIntegrationGroups(createIntegrationGroupDto: CreateIntegrationGroupDto): Promise<any> {
+    return this.prisma.integrationGroup.create({
       data: {
         name: createIntegrationGroupDto.name
       },
@@ -56,11 +54,9 @@ export class IntegrationsService {
         name: true
       }
     });
-
-    return new ApiResponse(true, 'Integration group created successfully', group);
   }
 
-  async updateIntegrationGroups(id: number, updateIntegrationGroupDto: UpdateIntegrationGroupDto): Promise<ApiResponse<any>> {
+  async updateIntegrationGroups(id: number, updateIntegrationGroupDto: UpdateIntegrationGroupDto): Promise<any> {
     const group = await this.prisma.integrationGroup.findUnique({
       where: { id }
     });
@@ -69,7 +65,7 @@ export class IntegrationsService {
       throw new NotFoundException('Integration group not found');
     }
 
-    const updatedGroup = await this.prisma.integrationGroup.update({
+    return this.prisma.integrationGroup.update({
       where: { id },
       data: {
         name: updateIntegrationGroupDto.name
@@ -79,11 +75,9 @@ export class IntegrationsService {
         name: true
       }
     });
-
-    return new ApiResponse(true, 'Integration group updated successfully', updatedGroup);
   }
 
-  async removeIntegrationGroups(id: number): Promise<ApiResponse<any>> {
+  async removeIntegrationGroups(id: number): Promise<void> {
     const group = await this.prisma.integrationGroup.findUnique({
       where: { id }
     });
@@ -114,13 +108,11 @@ export class IntegrationsService {
     await this.prisma.integrationGroup.delete({
       where: { id }
     });
-
-    return new ApiResponse(true, 'Integration group deleted successfully');
   }
 
   // Integration CRUD operations
-  async findAllIntegrations(): Promise<ApiResponse<any>> {
-    const integrations = await this.prisma.integration.findMany({
+  async findAllIntegrations(): Promise<any> {
+    return this.prisma.integration.findMany({
       select: {
         id: true,
         name: true,
@@ -137,10 +129,9 @@ export class IntegrationsService {
         }
       }
     });
-    return new ApiResponse(true, '', integrations);
   }
 
-  async getIntegrationById(id: number): Promise<ApiResponse<any>> {
+  async getIntegrationById(id: number): Promise<any> {
     const integration = await this.prisma.integration.findUnique({
       where: { id },
       select: {
@@ -164,11 +155,11 @@ export class IntegrationsService {
       throw new NotFoundException('Integration not found');
     }
 
-    return new ApiResponse(true, 'Integration retrieved successfully', integration);
+    return integration;
   }
 
-  async createIntegration(createIntegrationDto: CreateIntegrationDto): Promise<ApiResponse<any>> {
-    const integration = await this.prisma.integration.create({
+  async createIntegration(createIntegrationDto: CreateIntegrationDto): Promise<any> {
+    return this.prisma.integration.create({
       data: {
         name: createIntegrationDto.name,
         url: createIntegrationDto.url,
@@ -197,11 +188,9 @@ export class IntegrationsService {
         }
       }
     });
-
-    return new ApiResponse(true, 'Integration created successfully', integration);
   }
 
-  async updateIntegration(id: number, updateIntegrationDto: UpdateIntegrationDto): Promise<ApiResponse<any>> {
+  async updateIntegration(id: number, updateIntegrationDto: UpdateIntegrationDto): Promise<any> {
     const integration = await this.prisma.integration.findUnique({
       where: { id }
     });
@@ -210,7 +199,7 @@ export class IntegrationsService {
       throw new NotFoundException('Integration not found');
     }
 
-    const updatedIntegration = await this.prisma.integration.update({
+    return this.prisma.integration.update({
       where: { id },
       data: {
         name: updateIntegrationDto.name,
@@ -240,11 +229,9 @@ export class IntegrationsService {
         }
       }
     });
-
-    return new ApiResponse(true, 'Integration updated successfully', updatedIntegration);
   }
 
-  async removeIntegration(id: number): Promise<ApiResponse<any>> {
+  async removeIntegration(id: number): Promise<void> {
     const integration = await this.prisma.integration.findUnique({
       where: { id }
     });
@@ -262,13 +249,11 @@ export class IntegrationsService {
     await this.prisma.integration.delete({
       where: { id }
     });
-
-    return new ApiResponse(true, 'Integration deleted successfully');
   }
 
   // PlanIntegration CRUD operations
-  async findAllPlanIntegrations(): Promise<ApiResponse<any>> {
-    const planIntegrations = await this.prisma.planIntegration.findMany({
+  async findAllPlanIntegrations(): Promise<any> {
+    return this.prisma.planIntegration.findMany({
       select: {
         id: true,
         planId: true,
@@ -287,10 +272,9 @@ export class IntegrationsService {
         }
       }
     });
-    return new ApiResponse(true, '', planIntegrations);
   }
 
-  async getPlanIntegrationById(id: number): Promise<ApiResponse<any>> {
+  async getPlanIntegrationById(id: number): Promise<any> {
     const planIntegration = await this.prisma.planIntegration.findUnique({
       where: { id },
       select: {
@@ -316,11 +300,11 @@ export class IntegrationsService {
       throw new NotFoundException('Plan integration not found');
     }
 
-    return new ApiResponse(true, 'Plan integration retrieved successfully', planIntegration);
+    return planIntegration;
   }
 
-  async createPlanIntegration(createPlanIntegrationDto: CreatePlanIntegrationDto): Promise<ApiResponse<any>> {
-    const planIntegration = await this.prisma.planIntegration.create({
+  async createPlanIntegration(createPlanIntegrationDto: CreatePlanIntegrationDto): Promise<any> {
+    return this.prisma.planIntegration.create({
       data: {
         plan: {
           connect: {
@@ -351,11 +335,9 @@ export class IntegrationsService {
         }
       }
     });
-
-    return new ApiResponse(true, 'Plan integration created successfully', planIntegration);
   }
 
-  async updatePlanIntegration(id: number, updatePlanIntegrationDto: UpdatePlanIntegrationDto): Promise<ApiResponse<any>> {
+  async updatePlanIntegration(id: number, updatePlanIntegrationDto: UpdatePlanIntegrationDto): Promise<any> {
     const planIntegration = await this.prisma.planIntegration.findUnique({
       where: { id }
     });
@@ -364,7 +346,7 @@ export class IntegrationsService {
       throw new NotFoundException('Plan integration not found');
     }
 
-    const updatedPlanIntegration = await this.prisma.planIntegration.update({
+    return this.prisma.planIntegration.update({
       where: { id },
       data: {
         plan: updatePlanIntegrationDto.planId ? {
@@ -396,11 +378,9 @@ export class IntegrationsService {
         }
       }
     });
-
-    return new ApiResponse(true, 'Plan integration updated successfully', updatedPlanIntegration);
   }
 
-  async removePlanIntegration(id: number): Promise<ApiResponse<any>> {
+  async removePlanIntegration(id: number): Promise<void> {
     const planIntegration = await this.prisma.planIntegration.findUnique({
       where: { id }
     });
@@ -412,11 +392,9 @@ export class IntegrationsService {
     await this.prisma.planIntegration.delete({
       where: { id }
     });
-
-    return new ApiResponse(true, 'Plan integration deleted successfully');
   }
 
-  async uploadIntegrationImage(id: number, file: Express.Multer.File): Promise<ApiResponse<any>> {
+  async uploadIntegrationImage(id: number, file: Express.Multer.File): Promise<any> {
     // Check if integration exists
     const integration = await this.prisma.integration.findUnique({
       where: { id }
@@ -430,7 +408,7 @@ export class IntegrationsService {
     const uploadedImage = await this.cloudinary.uploadImage(file, 'integrations');
     
     // Update integration with the image URL
-    const updatedIntegration = await this.prisma.integration.update({
+    return this.prisma.integration.update({
       where: { id },
       data: {
         logoImage: uploadedImage.url
@@ -451,11 +429,9 @@ export class IntegrationsService {
         }
       }
     });
-
-    return new ApiResponse(true, 'Integration image uploaded successfully', updatedIntegration);
   }
 
-  async deleteIntegrationImage(id: number): Promise<ApiResponse<any>> {
+  async deleteIntegrationImage(id: number): Promise<any> {
     // Check if integration exists
     const integration = await this.prisma.integration.findUnique({
       where: { id }
@@ -483,7 +459,7 @@ export class IntegrationsService {
     }
 
     // Remove image URL from integration
-    const updatedIntegration = await this.prisma.integration.update({
+    return this.prisma.integration.update({
       where: { id },
       data: {
         logoImage: null
@@ -504,8 +480,6 @@ export class IntegrationsService {
         }
       }
     });
-
-    return new ApiResponse(true, 'Integration image deleted successfully', updatedIntegration);
   }
 
   private extractPublicIdFromUrl(url: string): string {
