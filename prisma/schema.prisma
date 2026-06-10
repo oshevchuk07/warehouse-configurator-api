@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PaymentType {
+  MONTHLY
+  YEARLY
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  email String @unique
+  hash  String
+
+  firstName            String?
+  lastName             String?
+  isActive             Boolean   @default(false)
+  avatar               String?
+  passwordResetCode    String?
+  passwordResetExpires DateTime?
+  activationCode       String?
+
+  role        Role        @default(USER)
+  paymentType PaymentType @default(MONTHLY)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  plan   Plan? @relation(fields: [planId], references: [id])
+  planId Int?
+}
+
+model Plan {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  subtitle    String?
+  isActive    Boolean @default(true)
+  isPopular   Boolean @default(true)
+
+  prevMonthlyPrice Float?
+  monthlyPrice     Float?
+
+  prevYearlyPrice Float?
+  yearlyPrice     Float?
+
+  advantages Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users        User[]
+  planServices PlanService[]
+}
+
+// Store category names (ERP, Market, etc..)
+model ServiceCategory {
+  id       Int       @id @default(autoincrement())
+  name     String
+  services Service[]
+}
+
+// Store info about service & relation to category
+model Service {
+  id          Int             @id @default(autoincrement())
+  name        String
+  url         String?
+  description String?
+  logoImage   String?
+  isActive    Boolean         @default(true)
+  category    ServiceCategory @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  planLinks   PlanService[] // зв’язок з планами
+}
+
+// Store relation between Service and plan -> many to many
+model PlanService {
+  id        Int     @id @default(autoincrement())
+  plan      Plan    @relation(fields: [planId], references: [id])
+  planId    Int
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId Int
+
+  @@unique([planId, serviceId])
+}
