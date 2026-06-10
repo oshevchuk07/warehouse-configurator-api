@@ -2,6 +2,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreatePlanDto, UpdatePlanDto } from "./plan.dto";
+import { PaginationDto, PaginatedResponseDto } from "src/common/dto/pagination.dto";
 
 @Injectable()
 export class PlanService {
@@ -9,25 +10,47 @@ export class PlanService {
     private prisma: PrismaService
   ) { }
 
-  async findAll(): Promise<any> {
-    return this.prisma.plan.findMany({
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        subtitle: true,
-        isActive: true,
-        isPopular: true,
-        monthlyPrice: true,
-        yearlyPrice: true,
-        oldMonthlyPrice: true,
-        oldYearlyPrice: true,
-        features: true,
-        createdAt: true,
-        updatedAt: true,
-        planIntegrations: true
+  async findAll(paginationDto: PaginationDto): Promise<PaginatedResponseDto<any>> {
+    const { page, limit } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const [plans, total] = await Promise.all([
+      this.prisma.plan.findMany({
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          subtitle: true,
+          isActive: true,
+          isPopular: true,
+          monthlyPrice: true,
+          yearlyPrice: true,
+          oldMonthlyPrice: true,
+          oldYearlyPrice: true,
+          features: true,
+          createdAt: true,
+          updatedAt: true,
+          planIntegrations: true
+        }
+      }),
+      this.prisma.plan.count()
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: plans,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1
       }
-    });
+    };
   }
 
   async getPlanById(id: number): Promise<any> {

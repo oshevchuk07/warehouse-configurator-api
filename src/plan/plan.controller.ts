@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, Query } from "@nestjs/common";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { PlanService } from "./plan.service";
 import { CreatePlanDto, UpdatePlanDto, AddIntegrationsToPlanDto } from "./plan.dto";
+import { PaginationDto } from "src/common/dto/pagination.dto";
 
 @Controller('plans')
 @UseGuards(JwtAuthGuard)
@@ -16,8 +17,8 @@ export class PlanController {
   }
 
   @Get()
-  findAll() {
-    return this.planService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.planService.findAll(paginationDto);
   }
 
   @Get(':id')

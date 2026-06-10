@@ -9,6 +9,7 @@ import {
   UpdatePlanIntegrationDto
 } from "./integrations.dto";
 import { CloudinaryService } from "src/cloudinary/cloudinary.service";
+import { PaginationDto, PaginatedResponseDto } from "src/common/dto/pagination.dto";
 
 @Injectable()
 export class IntegrationsService {
@@ -18,14 +19,36 @@ export class IntegrationsService {
   ) { }
 
   // IntegrationGroup CRUD operations
-  async findAllIntegrationGroups(): Promise<any> {
-    return this.prisma.integrationGroup.findMany({
-      select: {
-        id: true,
-        name: true,
-        integrations: true
+  async findAllIntegrationGroups(paginationDto: PaginationDto): Promise<PaginatedResponseDto<any>> {
+    const { page, limit } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const [groups, total] = await Promise.all([
+      this.prisma.integrationGroup.findMany({
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          name: true,
+          integrations: true
+        }
+      }),
+      this.prisma.integrationGroup.count()
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: groups,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1
       }
-    });
+    };
   }
 
   async getIntegrationGroupsById(id: number): Promise<any> {
@@ -111,24 +134,46 @@ export class IntegrationsService {
   }
 
   // Integration CRUD operations
-  async findAllIntegrations(): Promise<any> {
-    return this.prisma.integration.findMany({
-      select: {
-        id: true,
-        name: true,
-        url: true,
-        description: true,
-        logoImage: true,
-        isActive: true,
-        groupId: true,
-        group: {
-          select: {
-            id: true,
-            name: true
+  async findAllIntegrations(paginationDto: PaginationDto): Promise<PaginatedResponseDto<any>> {
+    const { page, limit } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const [integrations, total] = await Promise.all([
+      this.prisma.integration.findMany({
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          name: true,
+          url: true,
+          description: true,
+          logoImage: true,
+          isActive: true,
+          groupId: true,
+          group: {
+            select: {
+              id: true,
+              name: true
+            }
           }
         }
+      }),
+      this.prisma.integration.count()
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: integrations,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1
       }
-    });
+    };
   }
 
   async getIntegrationById(id: number): Promise<any> {
@@ -252,26 +297,48 @@ export class IntegrationsService {
   }
 
   // PlanIntegration CRUD operations
-  async findAllPlanIntegrations(): Promise<any> {
-    return this.prisma.planIntegration.findMany({
-      select: {
-        id: true,
-        planId: true,
-        integrationId: true,
-        plan: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        integration: {
-          select: {
-            id: true,
-            name: true
+  async findAllPlanIntegrations(paginationDto: PaginationDto): Promise<PaginatedResponseDto<any>> {
+    const { page, limit } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const [planIntegrations, total] = await Promise.all([
+      this.prisma.planIntegration.findMany({
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          planId: true,
+          integrationId: true,
+          plan: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          integration: {
+            select: {
+              id: true,
+              name: true
+            }
           }
         }
+      }),
+      this.prisma.planIntegration.count()
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: planIntegrations,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1
       }
-    });
+    };
   }
 
   async getPlanIntegrationById(id: number): Promise<any> {

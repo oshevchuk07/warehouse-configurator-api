@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, UploadedFile, UseInterceptors, Query } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { IntegrationsService } from "./integrations.service";
@@ -10,6 +10,7 @@ import {
   CreatePlanIntegrationDto,
   UpdatePlanIntegrationDto
 } from "./integrations.dto";
+import { PaginationDto } from "src/common/dto/pagination.dto";
 
 @Controller('integrations')
 @UseGuards(JwtAuthGuard)
@@ -25,8 +26,8 @@ export class IntegrationsController {
   }
 
   @Get('groups')
-  findAllGroups() {
-    return this.integrationsService.findAllIntegrationGroups();
+  findAllGroups(@Query() paginationDto: PaginationDto) {
+    return this.integrationsService.findAllIntegrationGroups(paginationDto);
   }
 
   @Get('groups/:id')
@@ -51,8 +52,8 @@ export class IntegrationsController {
   }
 
   @Get()
-  findAll() {
-    return this.integrationsService.findAllIntegrations();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.integrationsService.findAllIntegrations(paginationDto);
   }
 
   @Get(':id')
@@ -88,8 +89,8 @@ export class IntegrationsController {
   }
 
   @Get('plan-integrations')
-  findAllPlanIntegrations() {
-    return this.integrationsService.findAllPlanIntegrations();
+  findAllPlanIntegrations(@Query() paginationDto: PaginationDto) {
+    return this.integrationsService.findAllPlanIntegrations(paginationDto);
   }
 
   @Get('plan-integrations/:id')

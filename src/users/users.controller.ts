@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Put, Req, BadRequestException, UseGuards, UseInterceptors, ClassSerializerInterceptor, UploadedFile, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Put, Req, BadRequestException, UseGuards, UseInterceptors, ClassSerializerInterceptor, UploadedFile, Post, Query } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { UsersService } from "./users.service";
@@ -6,6 +6,7 @@ import { UpdateUserDto } from "./users.dto";
 import { ChangePasswordDto } from "./users.dto";
 import { AssignPlanDto } from "./users.dto";
 import { UpdateSelfDto } from "./users.dto";
+import { PaginationDto } from "src/common/dto/pagination.dto";
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -16,8 +17,8 @@ export class UsersController {
   ) { }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.usersService.findAll(paginationDto);
   }
 
   @Get('me')

@@ -3,6 +3,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { PrismaService } from "src/prisma/prisma.service";
 import { CloudinaryService } from "src/cloudinary/cloudinary.service";
 import * as bcrypt from 'bcrypt';
+import { PaginationDto, PaginatedResponseDto } from "src/common/dto/pagination.dto";
 
 @Injectable()
 export class UsersService {
@@ -11,22 +12,44 @@ export class UsersService {
     private cloudinary: CloudinaryService
   ) { }
 
-  async findAll(): Promise<any> {
-    return this.prisma.user.findMany({
-      select: {
-        createdAt: true,
-        email: true,
-        firstName: true,
-        id: true,
-        isActive: true,
-        lastName: true,
-        paymentType: true,
-        plan: true,
-        planId: true,
-        role: true,
-        updatedAt: true
+  async findAll(paginationDto: PaginationDto): Promise<PaginatedResponseDto<any>> {
+    const { page, limit } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        skip,
+        take: limit,
+        select: {
+          createdAt: true,
+          email: true,
+          firstName: true,
+          id: true,
+          isActive: true,
+          lastName: true,
+          paymentType: true,
+          plan: true,
+          planId: true,
+          role: true,
+          updatedAt: true
+        }
+      }),
+      this.prisma.user.count()
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: users,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1
       }
-    });
+    };
   }
 
   async getUserById(id: number): Promise<any> {
