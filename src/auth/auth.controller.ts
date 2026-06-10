@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request, UseGuards, ValidationPipe } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { LoginDto, RegisterDto, ActivateDto } from "./dto/auth.dto";
+import { LoginDto, RegisterDto, ActivateDto, ForgotPasswordDto } from "./dto/auth.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 
@@ -49,7 +49,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request password reset code' })
   async forgotPassword(
-    @Body() body: { email: string }
+    @Body(ValidationPipe) body: ForgotPasswordDto
   ) {
     return await this.authService.forgotPassword(body.email);
   }

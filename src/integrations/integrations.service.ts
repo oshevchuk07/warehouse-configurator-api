@@ -68,7 +68,7 @@ export class IntegrationsService {
   }
 
   async createIntegrationGroups(createIntegrationGroupDto: CreateIntegrationGroupDto): Promise<any> {
-    return this.prisma.integrationGroup.create({
+    return await this.prisma.integrationGroup.create({
       data: {
         name: createIntegrationGroupDto.name
       },
@@ -204,7 +204,7 @@ export class IntegrationsService {
   }
 
   async createIntegration(createIntegrationDto: CreateIntegrationDto): Promise<any> {
-    return this.prisma.integration.create({
+    return await this.prisma.integration.create({
       data: {
         name: createIntegrationDto.name,
         url: createIntegrationDto.url,
@@ -371,7 +371,7 @@ export class IntegrationsService {
   }
 
   async createPlanIntegration(createPlanIntegrationDto: CreatePlanIntegrationDto): Promise<any> {
-    return this.prisma.planIntegration.create({
+    return await this.prisma.planIntegration.create({
       data: {
         plan: {
           connect: {

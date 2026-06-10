@@ -34,6 +34,7 @@ export class UsersController {
   @Put('me')
   @UseInterceptors(FileInterceptor('avatar'))
   @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UpdateSelfDto })
   @ApiOperation({ summary: 'Update current user profile' })
   updateSelf(
     @Req() req: any, 
