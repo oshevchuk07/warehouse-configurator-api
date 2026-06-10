@@ -21,12 +21,12 @@ export class PlanService {
         isPopular: true,
         monthlyPrice: true,
         yearlyPrice: true,
-        prevMonthlyPrice: true,
-        prevYearlyPrice: true,
-        advantages: true,
+        oldMonthlyPrice: true,
+        oldYearlyPrice: true,
+        features: true,
         createdAt: true,
         updatedAt: true,
-        planServices: true
+        planIntegrations: true
       }
     });
     return new ApiResponse(true, '', plans);
@@ -44,12 +44,12 @@ export class PlanService {
         isPopular: true,
         monthlyPrice: true,
         yearlyPrice: true,
-        prevMonthlyPrice: true,
-        prevYearlyPrice: true,
-        advantages: true,
+        oldMonthlyPrice: true,
+        oldYearlyPrice: true,
+        features: true,
         createdAt: true,
         updatedAt: true,
-        planServices: true
+        planIntegrations: true
       }
     });
 
@@ -60,7 +60,7 @@ export class PlanService {
     return new ApiResponse(true, 'Plan retrieved successfully', plan);
   }
 
-  async getPlanWithServices(id: number): Promise<ApiResponse<any>> {
+  async getPlanWithIntegrations(id: number): Promise<ApiResponse<any>> {
     const plan = await this.prisma.plan.findUnique({
       where: { id },
       select: {
@@ -72,15 +72,15 @@ export class PlanService {
         isPopular: true,
         monthlyPrice: true,
         yearlyPrice: true,
-        prevMonthlyPrice: true,
-        prevYearlyPrice: true,
-        advantages: true,
+        oldMonthlyPrice: true,
+        oldYearlyPrice: true,
+        features: true,
         createdAt: true,
         updatedAt: true,
-        planServices: {
+        planIntegrations: {
           select: {
             id: true,
-            service: {
+            integration: {
               select: {
                 id: true,
                 name: true,
@@ -88,7 +88,7 @@ export class PlanService {
                 description: true,
                 logoImage: true,
                 isActive: true,
-                category: {
+                group: {
                   select: {
                     id: true,
                     name: true
@@ -105,29 +105,16 @@ export class PlanService {
       throw new NotFoundException('Plan not found');
     }
 
-    return new ApiResponse(true, 'Plan with services retrieved successfully', plan);
+    return new ApiResponse(true, 'Plan with integrations retrieved successfully', plan);
   }
 
   async createPlan(createPlanDto: CreatePlanDto): Promise<ApiResponse<any>> {
     const data = Object.fromEntries(
       Object.entries(createPlanDto).filter(([_, v]) => v !== undefined)
-    ) as CreatePlanDto;
+    ) as any;
 
     const plan = await this.prisma.plan.create({
       data: data,
-      // {
-      //   name: createPlanDto.name,
-      //   description: createPlanDto.description,
-      //   subtitle: createPlanDto.subtitle,
-      //   isActive: createPlanDto.isActive,
-      //   isPopular: createPlanDto.isPopular,
-
-      //   monthlyPrice: createPlanDto.monthlyPrice,
-      //   yearlyPrice: createPlanDto.yearlyPrice,
-      //   prevMonthlyPrice: createPlanDto.prevMonthlyPrice,
-      //   prevYearlyPrice: createPlanDto.prevYearlyPrice,
-      //   advantages: createPlanDto.advantages
-      // },
       select: {
         id: true,
         name: true,
@@ -138,9 +125,9 @@ export class PlanService {
 
         monthlyPrice: true,
         yearlyPrice: true,
-        prevMonthlyPrice: true,
-        prevYearlyPrice: true,
-        advantages: true,
+        oldMonthlyPrice: true,
+        oldYearlyPrice: true,
+        features: true,
         createdAt: true,
         updatedAt: true
       }
@@ -169,9 +156,9 @@ export class PlanService {
 
         monthlyPrice: updatePlanDto.monthlyPrice,
         yearlyPrice: updatePlanDto.yearlyPrice,
-        prevMonthlyPrice: updatePlanDto.prevMonthlyPrice,
-        prevYearlyPrice: updatePlanDto.prevYearlyPrice,
-        advantages: updatePlanDto.advantages
+        oldMonthlyPrice: updatePlanDto.oldMonthlyPrice,
+        oldYearlyPrice: updatePlanDto.oldYearlyPrice,
+        features: updatePlanDto.features
       },
       select: {
         id: true,
@@ -183,9 +170,9 @@ export class PlanService {
 
         monthlyPrice: true,
         yearlyPrice: true,
-        prevMonthlyPrice: true,
-        prevYearlyPrice: true,
-        advantages: true,
+        oldMonthlyPrice: true,
+        oldYearlyPrice: true,
+        features: true,
         createdAt: true,
         updatedAt: true
       }
@@ -203,8 +190,8 @@ export class PlanService {
       throw new NotFoundException('Plan not found');
     }
 
-    // Delete all related plan services first
-    await this.prisma.planService.deleteMany({
+    // Delete all related plan integrations first
+    await this.prisma.planIntegration.deleteMany({
       where: { planId: id }
     });
 
@@ -216,7 +203,7 @@ export class PlanService {
     return new ApiResponse(true, 'Plan deleted successfully');
   }
 
-  async bulkReplacePlanServices(planId: number, serviceIds: number[]): Promise<ApiResponse<any>> {
+  async bulkReplacePlanIntegrations(planId: number, integrationIds: number[]): Promise<ApiResponse<any>> {
     // Check if plan exists
     const plan = await this.prisma.plan.findUnique({
       where: { id: planId }
@@ -226,23 +213,23 @@ export class PlanService {
       throw new NotFoundException('Plan not found');
     }
 
-    // Delete all existing plan services for this plan
-    await this.prisma.planService.deleteMany({
+    // Delete all existing plan integrations for this plan
+    await this.prisma.planIntegration.deleteMany({
       where: { planId }
     });
 
-    // Create new plan services
-    const newPlanServices = serviceIds.map(serviceId => ({
+    // Create new plan integrations
+    const newPlanIntegrations = integrationIds.map(integrationId => ({
       planId,
-      serviceId
+      integrationId
     }));
 
-    if (newPlanServices.length > 0) {
-      await this.prisma.planService.createMany({
-        data: newPlanServices
+    if (newPlanIntegrations.length > 0) {
+      await this.prisma.planIntegration.createMany({
+        data: newPlanIntegrations
       });
     }
 
-    return new ApiResponse(true, 'Plan services updated successfully');
+    return new ApiResponse(true, 'Plan integrations updated successfully');
   }
 }

@@ -31,15 +31,15 @@ export class CreatePlanDto {
 
   @IsNumber()
   @IsOptional()
-  prevMonthlyPrice?: number;
+  oldMonthlyPrice?: number;
 
   @IsNumber()
   @IsOptional()
-  prevYearlyPrice?: number;
+  oldYearlyPrice?: number;
 
   @IsJSON()
   @IsOptional()
-  advantages?: any;
+  features?: any;
 }
 
 export class UpdatePlanDto {
@@ -73,23 +73,23 @@ export class UpdatePlanDto {
 
   @IsNumber()
   @IsOptional()
-  prevMonthlyPrice?: number;
+  oldMonthlyPrice?: number;
 
   @IsNumber()
   @IsOptional()
-  prevYearlyPrice?: number;
+  oldYearlyPrice?: number;
 
   @IsJSON()
   @IsOptional()
-  advantages?: any;
+  features?: any;
 }
 
-export class AddServicesToPlanDto {
+export class AddIntegrationsToPlanDto {
   @IsNumber()
   @IsNotEmpty()
   planId: number;
 
   @IsNumber({}, { each: true })
   @IsNotEmpty()
-  serviceIds: number[];
+  integrationIds: number[];
 }

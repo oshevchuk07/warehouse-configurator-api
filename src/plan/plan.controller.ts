@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { PlanService } from "./plan.service";
-import { CreatePlanDto, UpdatePlanDto, AddServicesToPlanDto } from "./plan.dto";
+import { CreatePlanDto, UpdatePlanDto, AddIntegrationsToPlanDto } from "./plan.dto";
 
-@Controller('plan')
+@Controller('plans')
 @UseGuards(JwtAuthGuard)
 export class PlanController {
   constructor(
@@ -15,7 +15,7 @@ export class PlanController {
     return this.planService.createPlan(createPlanDto);
   }
 
-  @Get('list')
+  @Get('')
   findAll() {
     return this.planService.findAll();
   }
@@ -35,8 +35,8 @@ export class PlanController {
     return this.planService.removePlan(+id);
   }
 
-  @Post('bulk-replace-services')
-  bulkReplaceServices(@Body() addServicesToPlanDto: AddServicesToPlanDto) {
-    return this.planService.bulkReplacePlanServices(addServicesToPlanDto.planId, addServicesToPlanDto.serviceIds);
+  @Post('bulk-replace-integrations')
+  bulkReplaceIntegrations(@Body() addIntegrationsToPlanDto: AddIntegrationsToPlanDto) {
+    return this.planService.bulkReplacePlanIntegrations(addIntegrationsToPlanDto.planId, addIntegrationsToPlanDto.integrationIds);
   }
 }

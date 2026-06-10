@@ -39,7 +39,7 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: {
         email,
-        hash: hashedPassword,
+        passwordHash: hashedPassword,
         firstName,
         lastName,
         isActive: false,
@@ -123,7 +123,7 @@ export class AuthService {
       throw new UnauthorizedException('Account is not active')
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.hash);
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid cerdentials')
     }

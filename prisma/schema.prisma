@@ -21,9 +21,9 @@ enum PaymentType {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  email String @unique
-  hash  String
+  id           Int    @id @default(autoincrement())
+  email        String @unique
+  passwordHash String
 
   firstName            String?
   lastName             String?
@@ -48,50 +48,53 @@ model Plan {
   description String?
   subtitle    String?
   isActive    Boolean @default(true)
-  isPopular   Boolean @default(true)
+  isPopular   Boolean @default(false)
 
-  prevMonthlyPrice Float?
-  monthlyPrice     Float?
-
-  prevYearlyPrice Float?
+  oldMonthlyPrice Float?
+  monthlyPrice    Float?
+  oldYearlyPrice  Float?
   yearlyPrice     Float?
 
-  advantages Json?
+  features Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users        User[]
-  planServices PlanService[]
+  users            User[]
+  planIntegrations PlanIntegration[]
 }
 
-// Store category names (ERP, Market, etc..)
-model ServiceCategory {
-  id       Int       @id @default(autoincrement())
-  name     String
-  services Service[]
+// Group names (ERP, Market, etc..)
+model IntegrationGroup {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  integrations Integration[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-// Store info about service & relation to category
-model Service {
-  id          Int             @id @default(autoincrement())
-  name        String
-  url         String?
-  description String?
-  logoImage   String?
-  isActive    Boolean         @default(true)
-  category    ServiceCategory @relation(fields: [categoryId], references: [id])
-  categoryId  Int
-  planLinks   PlanService[] // зв’язок з планами
+model Integration {
+  id               Int               @id @default(autoincrement())
+  name             String
+  url              String?
+  description      String?
+  logoImage        String?
+  isActive         Boolean           @default(true)
+  group            IntegrationGroup  @relation(fields: [groupId], references: [id])
+  groupId          Int
+  planIntegrations PlanIntegration[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
-// Store relation between Service and plan -> many to many
-model PlanService {
-  id        Int     @id @default(autoincrement())
-  plan      Plan    @relation(fields: [planId], references: [id])
-  planId    Int
-  service   Service @relation(fields: [serviceId], references: [id])
-  serviceId Int
+// Store relation between Integration and plan -> many to many
+model PlanIntegration {
+  id            Int         @id @default(autoincrement())
+  plan          Plan        @relation(fields: [planId], references: [id])
+  planId        Int
+  integration   Integration @relation(fields: [integrationId], references: [id])
+  integrationId Int
 
-  @@unique([planId, serviceId])
+  @@unique([planId, integrationId])
 }

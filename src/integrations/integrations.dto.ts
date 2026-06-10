@@ -1,20 +1,20 @@
 import { IsString, IsOptional, IsNumber, IsNotEmpty, IsBoolean, IsUrl } from "class-validator";
 
-// ServiceCategory DTOs
-export class CreateServiceCategoryDto {
+// IntegrationGroup DTOs
+export class CreateIntegrationGroupDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 }
 
-export class UpdateServiceCategoryDto {
+export class UpdateIntegrationGroupDto {
   @IsString()
   @IsOptional()
   name?: string;
 }
 
-// Service DTOs
-export class CreateServiceDto {
+// Integration DTOs
+export class CreateIntegrationDto {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -37,10 +37,10 @@ export class CreateServiceDto {
 
   @IsNumber()
   @IsNotEmpty()
-  categoryId: number;
+  groupId: number;
 }
 
-export class UpdateServiceDto {
+export class UpdateIntegrationDto {
   @IsString()
   @IsOptional()
   name?: string;
@@ -63,32 +63,32 @@ export class UpdateServiceDto {
 
   @IsNumber()
   @IsOptional()
-  categoryId?: number;
+  groupId?: number;
 }
 
-// PlanService DTOs
-export class CreatePlanServiceDto {
+// PlanIntegration DTOs
+export class CreatePlanIntegrationDto {
   @IsNumber()
   @IsNotEmpty()
   planId: number;
 
   @IsNumber()
   @IsNotEmpty()
-  serviceId: number;
+  integrationId: number;
 }
 
-export class UpdatePlanServiceDto {
+export class UpdatePlanIntegrationDto {
   @IsNumber()
   @IsOptional()
   planId?: number;
 
   @IsNumber()
   @IsOptional()
-  serviceId?: number;
+  integrationId?: number;
 }
 
 // Image upload DTO
-export class UploadServiceImageDto {
+export class UploadIntegrationImageDto {
   // This DTO is used for validation but doesn't have any fields
   // since we're handling file uploads differently
 }

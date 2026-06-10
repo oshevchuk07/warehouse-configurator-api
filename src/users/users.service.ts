@@ -177,7 +177,7 @@ export class UsersService {
     }
 
     // Check if current password is correct
-    const isPasswordValid = await bcrypt.compare(changePasswordDto.currentPassword, user.hash);
+    const isPasswordValid = await bcrypt.compare(changePasswordDto.currentPassword, user.passwordHash);
     if (!isPasswordValid) {
       throw new BadRequestException('Current password is incorrect');
     }
@@ -189,7 +189,7 @@ export class UsersService {
     // Update the user with the new password
     const updatedUser = await this.prisma.user.update({
       where: { id },
-      data: { hash: hashedPassword },
+      data: { passwordHash: hashedPassword },
       select: {
         createdAt: true,
         email: true,

@@ -2,7 +2,7 @@
 CREATE TABLE "User" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "email" TEXT NOT NULL,
-    "hash" TEXT NOT NULL,
+    "passwordHash" TEXT NOT NULL,
     "firstName" TEXT,
     "lastName" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT false,
@@ -25,45 +25,52 @@ CREATE TABLE "Plan" (
     "description" TEXT,
     "subtitle" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "isPopular" BOOLEAN NOT NULL DEFAULT true,
-    "prevMonthlyPrice" REAL,
+    "isPopular" BOOLEAN NOT NULL DEFAULT false,
+    "oldMonthlyPrice" REAL,
     "monthlyPrice" REAL,
-    "prevYearlyPrice" REAL,
+    "oldYearlyPrice" REAL,
     "yearlyPrice" REAL,
-    "advantages" JSONB,
+    "features" JSONB,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
 
 -- CreateTable
-CREATE TABLE "ServiceCategory" (
+CREATE TABLE "IntegrationGroup" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "name" TEXT NOT NULL
+    "name" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
 );
 
 -- CreateTable
-CREATE TABLE "Service" (
+CREATE TABLE "Integration" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "name" TEXT NOT NULL,
     "url" TEXT,
     "description" TEXT,
     "logoImage" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "categoryId" INTEGER NOT NULL,
-    CONSTRAINT "Service_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "ServiceCategory" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "groupId" INTEGER NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Integration_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "IntegrationGroup" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
-CREATE TABLE "PlanService" (
+CREATE TABLE "PlanIntegration" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "planId" INTEGER NOT NULL,
-    "serviceId" INTEGER NOT NULL,
-    CONSTRAINT "PlanService_planId_fkey" FOREIGN KEY ("planId") REFERENCES "Plan" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "PlanService_serviceId_fkey" FOREIGN KEY ("serviceId") REFERENCES "Service" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "integrationId" INTEGER NOT NULL,
+    CONSTRAINT "PlanIntegration_planId_fkey" FOREIGN KEY ("planId") REFERENCES "Plan" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "PlanIntegration_integrationId_fkey" FOREIGN KEY ("integrationId") REFERENCES "Integration" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PlanService_planId_serviceId_key" ON "PlanService"("planId", "serviceId");
+CREATE UNIQUE INDEX "IntegrationGroup_name_key" ON "IntegrationGroup"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PlanIntegration_planId_integrationId_key" ON "PlanIntegration"("planId", "integrationId");

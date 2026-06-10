@@ -5,7 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { PlanModule } from './plan/plan.module';
-import { ServiceModule } from './service/service.module';
+import { IntegrationsModule } from './integrations/integrations.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EmailModule } from './email/email.module';
 
@@ -15,7 +15,7 @@ imports: [
   PrismaModule,
   UsersModule,
   PlanModule,
-  ServiceModule,
+  IntegrationsModule,
   CloudinaryModule,
   EmailModule
 ],

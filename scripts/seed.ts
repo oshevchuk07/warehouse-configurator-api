@@ -18,7 +18,7 @@ async function bootstrap() {
     update: {},
     create: {
       email: 'admin@warehouse.com',
-      hash: await hash('123456789'),
+      passwordHash: await hash('123456789'),
       firstName: 'Admin',
       lastName: 'Warehouse',
       role: 'ADMIN',
@@ -32,7 +32,7 @@ async function bootstrap() {
     update: {},
     create: {
       email: 'test@test.com',
-      hash: '123456',
+      passwordHash: '123456',
       firstName: 'User',
       lastName: 'Test',
       role: 'USER',
