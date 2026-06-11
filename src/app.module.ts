@@ -8,18 +8,26 @@ import { PlanModule } from './plan/plan.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { EmailModule } from './email/email.module';
+import { StorageModule } from './storage/storage.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
-imports: [
-  AuthModule,
-  PrismaModule,
-  UsersModule,
-  PlanModule,
-  IntegrationsModule,
-  CloudinaryModule,
-  EmailModule
-],
-controllers: [AppController],
-providers: [AppService],
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
+    AuthModule,
+    PrismaModule,
+    UsersModule,
+    PlanModule,
+    IntegrationsModule,
+    CloudinaryModule,
+    EmailModule,
+    StorageModule
+  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

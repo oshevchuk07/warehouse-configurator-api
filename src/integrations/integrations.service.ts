@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, Inject } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import {
   CreateIntegrationGroupDto,
@@ -8,14 +8,14 @@ import {
   CreatePlanIntegrationDto,
   UpdatePlanIntegrationDto
 } from "./integrations.dto";
-import { CloudinaryService } from "src/cloudinary/cloudinary.service";
+import { IStorageService, STORAGE_SERVICE } from "src/storage/storage.interface";
 import { PaginationDto, PaginatedResponseDto } from "src/common/dto/pagination.dto";
 
 @Injectable()
 export class IntegrationsService {
   constructor(
     private prisma: PrismaService,
-    private cloudinary: CloudinaryService
+    @Inject(STORAGE_SERVICE) private storageService: IStorageService
   ) { }
 
   // IntegrationGroup CRUD operations
@@ -285,6 +285,15 @@ export class IntegrationsService {
       throw new NotFoundException('Integration not found');
     }
 
+    // Delete logo if exists
+    if (integration.logoImage) {
+      try {
+        await this.deleteIntegrationImage(id);
+      } catch (error) {
+        console.warn(`Could not delete logo for integration ${id}: ${error.message}`);
+      }
+    }
+
     // Delete all related plan integrations first
     await this.prisma.planIntegration.deleteMany({
       where: { integrationId: id }
@@ -471,8 +480,8 @@ export class IntegrationsService {
       throw new NotFoundException('Integration not found');
     }
 
-    // Upload image to Cloudinary
-    const uploadedImage = await this.cloudinary.uploadImage(file, 'integrations');
+    // Upload image using the unified storage service
+    const uploadedImage = await this.storageService.uploadImage(file, 'integrations');
     
     // Update integration with the image URL
     return this.prisma.integration.update({
@@ -514,15 +523,13 @@ export class IntegrationsService {
     }
 
     try {
-      // Extract public ID from the image URL
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      // For local storage, the URL contains the public_id pattern
+      // For Cloudinary, we might need a more robust extraction if not stored separately
+      // In this simple implementation, we'll try to extract it from the URL
       const publicId = this.extractPublicIdFromUrl(integration.logoImage);
-      
-      // Delete image from Cloudinary
-      await this.cloudinary.deleteImage(publicId);
+      await this.storageService.deleteImage(publicId);
     } catch (error) {
-      // If we can't delete from Cloudinary, we still want to remove the URL from the integration
-      console.warn(`Failed to delete image from Cloudinary: ${error.message}`);
+      console.warn(`Failed to delete image from storage: ${error.message}`);
     }
 
     // Remove image URL from integration
@@ -550,20 +557,17 @@ export class IntegrationsService {
   }
 
   private extractPublicIdFromUrl(url: string): string {
-    // Extract public ID from Cloudinary URL
-    // Example URL: https://res.cloudinary.com/demo/image/upload/v1644334844/products/sample.jpg
-    // Public ID would be: products/sample
-    
+    // Local: /uploads/integrations/uuid.png -> integrations/uuid.png
+    if (url.startsWith('/uploads/')) {
+      return url.replace('/uploads/', '');
+    }
+
+    // Cloudinary: extract from URL
     try {
-      // Match the public ID part of the URL
       const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)\.[^/.]+$/);
-      if (!match || !match[1]) {
-        throw new Error('Could not extract public ID from URL');
-      }
-      
-      return match[1];
+      return match ? match[1] : url;
     } catch (error) {
-      throw new Error(`Invalid Cloudinary URL: ${error.message}`);
+      return url;
     }
   }
 }

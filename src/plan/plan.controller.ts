@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, Query } from "@nestjs/common";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { PlanService } from "./plan.service";
-import { CreatePlanDto, UpdatePlanDto, AddIntegrationsToPlanDto } from "./plan.dto";
+import { CreatePlanDto, UpdatePlanDto } from "./plan.dto";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 

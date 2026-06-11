@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException, Inject } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { CloudinaryService } from "src/cloudinary/cloudinary.service";
 import * as bcrypt from 'bcrypt';
 import { PaginationDto, PaginatedResponseDto } from "src/common/dto/pagination.dto";
+import { IStorageService, STORAGE_SERVICE } from "src/storage/storage.interface";
 
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
-    private cloudinary: CloudinaryService
+    @Inject(STORAGE_SERVICE) private storageService: IStorageService
   ) { }
 
   async findAll(paginationDto: PaginationDto): Promise<PaginatedResponseDto<any>> {
@@ -66,7 +66,8 @@ export class UsersService {
         plan: true,
         planId: true,
         role: true,
-        updatedAt: true
+        updatedAt: true,
+        avatar: true
       }
     });
 
@@ -112,6 +113,15 @@ export class UsersService {
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    // Delete avatar if exists
+    if (user.avatar) {
+      try {
+        await this.removeAvatar(id);
+      } catch (error) {
+        console.warn(`Could not delete avatar for user ${id}: ${error.message}`);
+      }
     }
 
     await this.prisma.user.delete({
@@ -230,8 +240,7 @@ export class UsersService {
 
     // Handle avatar upload if provided
     if (avatar) {
-      // Upload image to Cloudinary
-      const uploadedImage = await this.cloudinary.uploadImage(avatar, 'avatars');
+      const uploadedImage = await this.storageService.uploadImage(avatar, 'avatars');
       updateData.avatar = uploadedImage.url;
     }
 
@@ -249,7 +258,8 @@ export class UsersService {
         plan: true,
         planId: true,
         role: true,
-        updatedAt: true
+        updatedAt: true,
+        avatar: true
       }
     });
   }
@@ -269,20 +279,11 @@ export class UsersService {
       throw new BadRequestException('User does not have an avatar');
     }
 
-    // Extract public ID from Cloudinary URL
-    const urlParts = user.avatar.split('/');
-    const publicIdWithExtension = urlParts[urlParts.length - 1];
-    let publicId = publicIdWithExtension.split('.')[0];
-    
-    if (urlParts.length >= 2 && urlParts[urlParts.length - 2].startsWith('v') && urlParts[urlParts.length - 2].match(/^v\d+$/)) {
-      publicId = urlParts[urlParts.length - 2] + '/' + publicId;
-    }
-
-    // Delete image from Cloudinary
     try {
-      await this.cloudinary.deleteImage(publicId);
+      const publicId = this.extractPublicIdFromUrl(user.avatar);
+      await this.storageService.deleteImage(publicId);
     } catch (error) {
-      console.error('Failed to delete image from Cloudinary:', error);
+      console.error('Failed to delete image from storage:', error);
     }
 
     // Remove avatar reference from user
@@ -303,5 +304,25 @@ export class UsersService {
         updatedAt: true
       }
     });
+  }
+
+  private extractPublicIdFromUrl(url: string): string {
+    // Local: /uploads/avatars/uuid.png -> avatars/uuid.png
+    if (url.startsWith('/uploads/')) {
+      return url.replace('/uploads/', '');
+    }
+
+    // Cloudinary logic
+    try {
+      const parts = url.split('/');
+      const filename = parts[parts.length - 1];
+      const publicIdWithFolder = parts.slice(parts.indexOf('upload') + 2, parts.length - 1).join('/') + '/' + filename.split('.')[0];
+      
+      // If simplified version doesn't work, we use simple match
+      const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)\.[^/.]+$/);
+      return match ? match[1] : publicIdWithFolder;
+    } catch (error) {
+      return url;
+    }
   }
 }
