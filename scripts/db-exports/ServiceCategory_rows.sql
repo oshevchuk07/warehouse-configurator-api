@@ -1,1 +1,0 @@
-INSERT INTO "public"."ServiceCategory" ("id", "name") VALUES (1, 'ERP'), (2, 'Plataformas de comercio electrónico'), (3, 'Marketplaces'), (4, 'Servicios logísticos');
